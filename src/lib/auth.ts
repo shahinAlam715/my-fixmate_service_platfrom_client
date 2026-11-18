@@ -8,6 +8,7 @@ const db = client.db("fixmateusers");
 export const auth = betterAuth({
      emailAndPassword: { 
     enabled: true, 
+      minPasswordLength: 6,
   }, 
   database: mongodbAdapter(db, {
     client,

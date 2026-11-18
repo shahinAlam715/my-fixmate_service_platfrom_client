@@ -67,12 +67,11 @@ export default function SignUpPage() {
       ...userData,
       callbackURL: "/",
     });
-
-    if (!data) {
-     toast.error("Sign Up fail!")
+    if (data) {
+      toast.success('Sign Up Successfull!')
+    }else{
+       toast.error("Sign Up fail!")
     }
-
-   toast.success('Sign Up Successfull!')
   };
 
   return (
