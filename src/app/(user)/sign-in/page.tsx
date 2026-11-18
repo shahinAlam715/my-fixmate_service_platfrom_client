@@ -66,6 +66,12 @@ export default function SignInPage() {
   }
 };
 
+const googlesignIn = async () => {
+  const data = await authClient.signIn.social({
+    provider: "google",
+  });
+};
+
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
@@ -125,6 +131,7 @@ export default function SignInPage() {
             <span className="h-px flex-1 bg-gray-200" />
           </div>
           <Button
+          onClick={googlesignIn}
             type="button"
             variant="outline"
             className="h-11 w-full gap-2.5 text-sm font-medium"
