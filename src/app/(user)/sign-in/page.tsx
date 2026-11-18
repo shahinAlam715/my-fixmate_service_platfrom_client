@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 /** Official Google "G" logo (4-color). */
 function GoogleIcon() {
@@ -34,27 +35,34 @@ function GoogleIcon() {
 export default function SignInPage() {
 
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  
-    const formData = new FormData(e.currentTarget);
-  
-    const userData = {
-      email: String(formData.get("email")),
-      password: String(formData.get("password")),
-    };
-  
+  e.preventDefault();
+
+  const formData = new FormData(e.currentTarget);
+
+  const userData = {
+    email: String(formData.get("email")),
+    password: String(formData.get("password")),
+  };
+
+  try {
     const { data, error } = await authClient.signIn.email({
-      ...userData
+      ...userData,
+      callbackURL: "/",
     });
-  
+
+    // Check Better Auth error
     if (error) {
-      console.error("Signup Error:", error.message);
+      toast.error(error.message || "Signin failed!");
       return;
     }
-  
-    console.log("Signup Successful:", data);
-  };
-  
+
+    if (data) {
+      toast.success("Signin Successful!");
+    }
+  } catch (err) {
+    toast.error("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
