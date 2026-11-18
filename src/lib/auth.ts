@@ -10,6 +10,12 @@ export const auth = betterAuth({
     enabled: true, 
       minPasswordLength: 6,
   }, 
+
+   trustedOrigins: [
+    "http://localhost:3000",
+    "https://my-fixmate-service-platfrom-client.vercel.app",           
+  ],
+
   database: mongodbAdapter(db, {
     client,
   }),
