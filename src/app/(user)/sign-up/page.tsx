@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 type Role = "customer" | "technician";
 
@@ -50,15 +51,33 @@ export default function SignUpPage() {
   const [role, setRole] = React.useState<Role>("customer");
 
   // Handle signup form
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
+  const formData = new FormData(e.currentTarget);
 
-    const userData = Object.fromEntries(formData.entries());
-
-    console.log("User Data:", userData);
+  const userData = {
+    name: String(formData.get("name")),
+    email: String(formData.get("email")),
+    password: String(formData.get("password")),
+    role: role,
   };
+
+  const { data, error } = await authClient.signUp.email({
+    ...userData,
+    callbackURL: "/",
+  });
+
+  if (error) {
+    console.error("Signup Error:", error.message);
+    return;
+  }
+
+  console.log("Signup Successful:", data);
+};
+
+    
+  
 
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
