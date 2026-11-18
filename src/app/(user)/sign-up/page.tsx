@@ -80,6 +80,8 @@ export default function SignUpPage() {
       toast.success("Signup Successful!");
       console.log("Signup Data:", data);
     }
+    // Full page reload after sign up
+    window.location.replace("/");
   } catch (err) {
     console.error("Unexpected Signup Error:", err);
     toast.error("Something went wrong. Please try again.");

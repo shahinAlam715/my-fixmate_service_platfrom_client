@@ -59,6 +59,8 @@ export default function SignInPage() {
     if (data) {
       toast.success("Signin Successful!");
     }
+    // Full page reload after sign in
+    window.location.replace("/");
   } catch (err) {
     toast.error("Something went wrong. Please try again.");
   }

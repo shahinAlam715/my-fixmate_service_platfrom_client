@@ -1,15 +1,29 @@
+
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+
+import {
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  UserRound,
+  X,
+} from "lucide-react";
+
 import { cn } from "cn";
 
 import Logo from "@/components/Logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,27 +32,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { authClient, useSession } from "@/lib/auth-client";
+import toast from "react-hot-toast";
+
 type Role = "customer" | "technician" | "admin";
 
-interface MockUser {
+interface AuthUser {
   name: string;
-  role: Role;
-  image?: string;
+  email: string;
+  image?: string | null;
+  role?: Role;
 }
-
-const MOCK_USER: MockUser = {
-  name: "Alex Morgan",
-  role: "customer",
-  image: "https://i.pravatar.cc/80?u=fixmate",
-};
-
-/**
- * UI-only mock auth — there is no real session yet.
- * `false` renders the logged-out navbar (Sign In / Sign Up, as in the design).
- * Set to `true` to preview the logged-in avatar dropdown.
- */
-const LOGGED_IN: boolean = false;
-const CURRENT_USER: MockUser | null = LOGGED_IN ? MOCK_USER : null;
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -46,14 +50,16 @@ const NAV_LINKS = [
   { label: "How It Works", href: "/about" },
 ];
 
-// Placeholder routes — these pages don't exist yet.
 const DASHBOARD_ROUTES: Record<Role, string> = {
   customer: "/dashboard",
   technician: "/technician/dashboard",
   admin: "/admin/dashboard",
 };
 
-const ROLE_BADGES: Record<Role, { label: string; className: string }> = {
+const ROLE_BADGES: Record<
+  Role,
+  { label: string; className: string }
+> = {
   customer: {
     label: "Customer",
     className: "border-blue-200 bg-blue-50 text-blue-700",
@@ -69,12 +75,14 @@ const ROLE_BADGES: Record<Role, { label: string; className: string }> = {
 };
 
 function initials(name: string) {
-  return name
-    .split(" ")
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return (
+    name
+      .split(" ")
+      .map((word) => word[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U"
+  );
 }
 
 function NavLink({
@@ -97,7 +105,9 @@ function NavLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "rounded-md text-sm font-medium transition-colors",
-        active ? "text-orange-600" : "text-gray-600 hover:text-orange-600",
+        active
+          ? "text-orange-600"
+          : "text-gray-600 hover:text-orange-600",
         className
       )}
     >
@@ -106,55 +116,116 @@ function NavLink({
   );
 }
 
-function UserAvatar({ user, className }: { user: MockUser; className?: string }) {
+function UserAvatar({
+  user,
+  className,
+}: {
+  user: AuthUser;
+  className?: string;
+}) {
   return (
     <Avatar className={className}>
-      <AvatarImage src={user.image} alt={user.name} className="object-cover" />
-      <AvatarFallback className="bg-[#1e1b4b] font-semibold text-white">
+      <AvatarImage
+        src={user.image || undefined}
+        alt={user.name}
+        className="object-cover"
+      />
+
+      <AvatarFallback className="bg-orange-600 font-semibold text-white">
         {initials(user.name)}
       </AvatarFallback>
     </Avatar>
   );
 }
 
-function UserMenu({ user, className }: { user: MockUser; className?: string }) {
-  const badge = ROLE_BADGES[user.role];
+function UserMenu({
+  user,
+}: {
+  user: AuthUser;
+}) {
+  const router = useRouter();
+
+  const role: Role =
+    user.role === "technician" || user.role === "admin"
+      ? user.role
+      : "customer";
+
+  const badge = ROLE_BADGES[role];
+
+ const handleSignOut = async () => {
+  try {
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error(error.message || "Sign out failed!");
+      return;
+    }
+
+    toast.success("Sign Out Successful!");
+
+    // Full page reload after sign out
+    window.location.replace("/");
+  } catch (error) {
+    console.error("Sign out error:", error);
+    toast.error("Something went wrong!");
+  }
+};
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Open user menu"
-        className={cn(
-          "flex rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/50",
-          className
-        )}
+        className="flex rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-orange-500"
       >
         <UserAvatar user={user} />
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="w-64">
+        {/* User Information */}
         <div className="flex items-center gap-3 px-2 py-2">
           <UserAvatar user={user} />
+
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{user.name}</p>
+            <p className="truncate text-sm font-semibold text-gray-900">
+              {user.name}
+            </p>
+
+            <p className="truncate text-xs text-gray-500">
+              {user.email}
+            </p>
+
             <Badge className={cn("mt-1 w-fit", badge.className)}>
               {badge.label}
             </Badge>
           </div>
         </div>
+
         <DropdownMenuSeparator />
+
+        {/* Dashboard */}
         <DropdownMenuItem
-          render={<Link href={DASHBOARD_ROUTES[user.role]} />}
+          render={<Link href={DASHBOARD_ROUTES[role]} />}
         >
-          <LayoutDashboard />
+          <LayoutDashboard className="size-4" />
           Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/profile" />}>
-          <UserRound />
+
+        {/* Update Profile */}
+        <DropdownMenuItem
+          render={<Link href="/profile" />}
+        >
+          <UserRound className="size-4" />
           Update Profile
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
-          <LogOut />
+
+        {/* Sign Out */}
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={handleSignOut}
+        >
+          <LogOut className="size-4" />
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -164,46 +235,87 @@ function UserMenu({ user, className }: { user: MockUser; className?: string }) {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter()
+
   const [mobileOpen, setMobileOpen] = useState(false);
-  const user = CURRENT_USER;
+
+  // Get real user session from Better Auth
+  const session = useSession();
+
+  const authUser = session.data?.user as AuthUser | undefined;
+
+  const isLoggedIn = !!authUser;
+
+  const user: AuthUser | null = authUser
+    ? {
+        ...authUser,
+        name: authUser.name || "User",
+        email: authUser.email || "",
+      }
+    : null;
 
   const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname === href;
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
 
-  const authDesktop = user ? (
-    <UserMenu user={user} />
-  ) : (
+  // Desktop authentication section
+  const authDesktop = (
     <>
-    <Link href={"/sign-in"}>
-      <Button variant="outline">Sign In</Button>
-    </Link>
-    <Link href={"/sign-up"}>
-      <Button className="bg-orange-600 text-white hover:bg-orange-700">
-        Sign Up
-      </Button>
-    </Link>
+      {isLoggedIn && user ? (
+        <UserMenu user={user} />
+      ) : (
+        <>
+          <Link href="/sign-in">
+            <Button variant="outline">
+              Sign In
+            </Button>
+          </Link>
+
+          <Link href="/sign-up">
+            <Button className="bg-orange-600 text-white hover:bg-orange-700">
+              Sign Up
+            </Button>
+          </Link>
+        </>
+      )}
     </>
   );
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
+
+        {/* Logo */}
         <div className="flex items-center gap-8">
           <Logo />
         </div>
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.href}
-                href={link.href}
-                label={link.label}
-                active={isActive(link.href)}
-              />
-            ))}
-          </nav>
 
-        <div className="hidden items-center gap-2 md:flex">{authDesktop}</div>
+        {/* Desktop Navigation */}
+        <nav
+          className="hidden items-center gap-6 md:flex"
+          aria-label="Main navigation"
+        >
+          {NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              active={isActive(link.href)}
+            />
+          ))}
+        </nav>
 
+        {/* Desktop Auth */}
+        <div className="hidden items-center gap-2 md:flex">
+          {session.isPending ? (
+            <div className="size-9 animate-pulse rounded-full bg-gray-200" />
+          ) : (
+            authDesktop
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
         <button
           type="button"
           className="flex size-10 items-center justify-center rounded-md text-gray-700 transition-colors hover:bg-gray-100 md:hidden"
@@ -219,6 +331,7 @@ export default function Navbar() {
         </button>
       </div>
 
+      {/* Mobile Navigation */}
       {mobileOpen && (
         <div className="border-t border-gray-200 bg-white md:hidden">
           <nav
@@ -236,17 +349,96 @@ export default function Navbar() {
               />
             ))}
           </nav>
-          <div className="flex flex-col gap-2 border-t border-gray-200 px-4 py-3">
-            {user ? (
-              <UserMenu user={user} className="self-start" />
+
+          <div className="flex flex-col gap-3 border-t border-gray-200 px-4 py-3">
+            {session.isPending ? (
+              <div className="h-10 animate-pulse rounded-md bg-gray-100" />
+            ) : isLoggedIn && user ? (
+              <>
+                {/* Mobile User Information */}
+                <div className="flex items-center gap-3">
+                  <UserAvatar user={user} />
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-900">
+                      {user.name}
+                    </p>
+
+                    <p className="truncate text-xs text-gray-500">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href={
+                    DASHBOARD_ROUTES[
+                      user.role === "technician" || user.role === "admin"
+                        ? user.role
+                        : "customer"
+                    ]
+                  }
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Button variant="outline" className="w-full gap-2">
+                    <LayoutDashboard className="size-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Button variant="outline" className="w-full gap-2">
+                    <UserRound className="size-4" />
+                    Update Profile
+                  </Button>
+                </Link>
+
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 text-red-600 hover:text-red-700"
+                  onClick={async () => {
+                    try {
+                      const { error } = await authClient.signOut();
+
+                      if (error) {
+                        console.error("Sign out error:", error);
+                        return;
+                      }
+
+                      setMobileOpen(false);
+                      router.push("/sign-in");
+                      router.refresh();
+                    } catch (error) {
+                      console.error("Sign out error:", error);
+                    }
+                  }}
+                >
+                  <LogOut className="size-4" />
+                  Sign Out
+                </Button>
+              </>
             ) : (
               <>
-                <Button variant="outline" className="w-full">
-                  Sign In
-                </Button>
-                <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
-                  Sign Up
-                </Button>
+                <Link
+                  href="/sign-in"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+
+                <Link
+                  href="/sign-up"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
+                    Sign Up
+                  </Button>
+                </Link>
               </>
             )}
           </div>
