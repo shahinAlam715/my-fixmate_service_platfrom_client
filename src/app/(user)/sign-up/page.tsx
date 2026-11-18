@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -9,8 +10,16 @@ import { Input } from "@/components/ui/input";
 type Role = "customer" | "technician";
 
 const ROLES: { value: Role; label: string; hint: string }[] = [
-  { value: "customer", label: "Customer", hint: "Book repairs" },
-  { value: "technician", label: "Technician", hint: "Offer repair services" },
+  {
+    value: "customer",
+    label: "Customer",
+    hint: "Book repairs",
+  },
+  {
+    value: "technician",
+    label: "Technician",
+    hint: "Offer repair services",
+  },
 ];
 
 /** Official Google "G" logo (4-color). */
@@ -40,6 +49,17 @@ function GoogleIcon() {
 export default function SignUpPage() {
   const [role, setRole] = React.useState<Role>("customer");
 
+  // Handle signup form
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const userData = Object.fromEntries(formData.entries());
+
+    console.log("User Data:", userData);
+  };
+
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
@@ -48,25 +68,32 @@ export default function SignUpPage() {
         </h1>
 
         <form
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
           className="mt-6 flex flex-col gap-4"
         >
+          {/* Full Name */}
           <Input
             type="text"
             name="name"
             autoComplete="name"
             aria-label="Full Name"
             placeholder="Full Name"
+            required
             className="h-10 px-3.5"
           />
+
+          {/* Email */}
           <Input
             type="email"
             name="email"
             autoComplete="email"
             aria-label="Email"
             placeholder="Email"
+            required
             className="h-10 px-3.5"
           />
+
+          {/* Password */}
           <div>
             <Input
               type="password"
@@ -74,67 +101,85 @@ export default function SignUpPage() {
               autoComplete="new-password"
               aria-label="Password"
               placeholder="Password"
+              minLength={6}
+              required
               className="h-10 px-3.5"
             />
+
             <p className="mt-2 text-xs text-red-600">
               Min 6 characters, one uppercase and one lowercase letter.
             </p>
           </div>
 
-          {/* Role picker */}
+          {/* Role Selection */}
           <fieldset>
-            <legend className="text-sm font-bold text-gray-900">I am a</legend>
+            <legend className="text-sm font-bold text-gray-900">
+              I am a
+            </legend>
+
             <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {ROLES.map((option) => {
                 const selected = role === option.value;
+
                 return (
-                  <button
+                  <label
                     key={option.value}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setRole(option.value)}
                     className={
-                      "rounded-xl border-2 p-4 text-left transition-colors " +
+                      "cursor-pointer rounded-xl border-2 p-4 transition-colors " +
                       (selected
                         ? "border-orange-600 bg-orange-50/60"
                         : "border-gray-200 hover:border-gray-300")
                     }
                   >
+                    <input
+                      type="radio"
+                      name="role"
+                      value={option.value}
+                      checked={selected}
+                      onChange={() => setRole(option.value)}
+                      className="sr-only"
+                    />
+
                     <span className="block text-sm font-semibold text-gray-900">
                       {option.label}
                     </span>
+
                     <span className="mt-0.5 block text-xs text-gray-500">
                       {option.hint}
                     </span>
-                  </button>
+                  </label>
                 );
               })}
             </div>
           </fieldset>
 
+          {/* Sign Up Button */}
           <Button
             type="submit"
             className="mt-1 h-11 w-full bg-orange-600 text-base font-semibold text-white hover:bg-orange-700"
           >
             Sign Up
           </Button>
-
-          {/* Sign up with Google */}
-          <div className="flex items-center gap-3">
-            <span className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
-            <span className="h-px flex-1 bg-gray-200" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-11 w-full gap-2.5 text-sm font-medium"
-          >
-            <GoogleIcon />
-            Sign up with Google
-          </Button>
         </form>
 
+        {/* Divider */}
+        <div className="my-4 flex items-center gap-3">
+          <span className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs text-gray-400">or</span>
+          <span className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        {/* Google Sign Up */}
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full gap-2.5 text-sm font-medium"
+        >
+          <GoogleIcon />
+          Sign up with Google
+        </Button>
+
+        {/* Sign In Link */}
         <p className="mt-5 text-center text-xs text-gray-500">
           Already have an account?{" "}
           <Link
