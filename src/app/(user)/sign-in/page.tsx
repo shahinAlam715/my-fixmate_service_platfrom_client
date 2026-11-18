@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 /** Official Google "G" logo (4-color). */
 function GoogleIcon() {
@@ -31,6 +32,30 @@ function GoogleIcon() {
 }
 
 export default function SignInPage() {
+
+   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    const formData = new FormData(e.currentTarget);
+  
+    const userData = {
+      email: String(formData.get("email")),
+      password: String(formData.get("password")),
+    };
+  
+    const { data, error } = await authClient.signIn.email({
+      ...userData
+    });
+  
+    if (error) {
+      console.error("Signup Error:", error.message);
+      return;
+    }
+  
+    console.log("Signup Successful:", data);
+  };
+  
+
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
@@ -39,7 +64,7 @@ export default function SignInPage() {
         </h1>
 
         <form
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
           className="mt-6 flex flex-col gap-4"
         >
           <div>
