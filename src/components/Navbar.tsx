@@ -51,7 +51,7 @@ const NAV_LINKS = [
 ];
 
 const DASHBOARD_ROUTES: Record<Role, string> = {
-  customer: "/dashboard",
+  customer: "/customer/dashboard",
   technician: "/technician/dashboard",
   admin: "/admin/dashboard",
 };
