@@ -51,28 +51,40 @@ export default function SignUpPage() {
   const [role, setRole] = React.useState<Role>("customer");
 
   // Handle signup form
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
+  const formData = new FormData(e.currentTarget);
 
-    const userData = {
-      name: String(formData.get("name")),
-      email: String(formData.get("email")),
-      password: String(formData.get("password")),
-      role: role,
-    };
+  const userData = {
+    name: String(formData.get("name")),
+    email: String(formData.get("email")),
+    password: String(formData.get("password")),
+    role,
+  };
 
+  try {
     const { data, error } = await authClient.signUp.email({
       ...userData,
       callbackURL: "/",
     });
-    if (data) {
-      toast.success('Sign Up Successfull!')
-    }else{
-       toast.error("Sign Up fail!")
+
+    // Check Better Auth error
+    if (error) {
+      console.error("Signup Error:", error);
+      toast.error(error.message || "Signup failed!");
+      return;
     }
-  };
+
+    if (data) {
+      toast.success("Signup Successful!");
+      console.log("Signup Data:", data);
+    }
+  } catch (err) {
+    console.error("Unexpected Signup Error:", err);
+    toast.error("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
