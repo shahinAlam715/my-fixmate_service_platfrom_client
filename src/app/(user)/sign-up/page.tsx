@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -7,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 type Role = "customer" | "technician";
 
@@ -52,32 +52,28 @@ export default function SignUpPage() {
 
   // Handle signup form
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget);
 
-  const userData = {
-    name: String(formData.get("name")),
-    email: String(formData.get("email")),
-    password: String(formData.get("password")),
-    role: role,
+    const userData = {
+      name: String(formData.get("name")),
+      email: String(formData.get("email")),
+      password: String(formData.get("password")),
+      role: role,
+    };
+
+    const { data, error } = await authClient.signUp.email({
+      ...userData,
+      callbackURL: "/",
+    });
+
+    if (!data) {
+     toast.error("Sign Up fail!")
+    }
+
+   toast.success('Sign Up Successfull!')
   };
-
-  const { data, error } = await authClient.signUp.email({
-    ...userData,
-    callbackURL: "/",
-  });
-
-  if (error) {
-    console.error("Signup Error:", error.message);
-    return;
-  }
-
-  console.log("Signup Successful:", data);
-};
-
-    
-  
 
   return (
     <div className="flex items-center justify-center px-4 py-10 sm:py-14">
@@ -86,10 +82,7 @@ export default function SignUpPage() {
           Create your account
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-6 flex flex-col gap-4"
-        >
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           {/* Full Name */}
           <Input
             type="text"
@@ -121,20 +114,20 @@ export default function SignUpPage() {
               aria-label="Password"
               placeholder="Password"
               minLength={6}
+              pattern="(?=.*[a-z])(?=.*[A-Z]).{6,}"
+              title="Password must contain at least 6 characters, one uppercase and one lowercase letter."
               required
               className="h-10 px-3.5"
             />
 
-            <p className="mt-2 text-xs text-red-600">
+            <p className="mt-2 text-xs text-gray-500">
               Min 6 characters, one uppercase and one lowercase letter.
             </p>
           </div>
 
           {/* Role Selection */}
           <fieldset>
-            <legend className="text-sm font-bold text-gray-900">
-              I am a
-            </legend>
+            <legend className="text-sm font-bold text-gray-900">I am a</legend>
 
             <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {ROLES.map((option) => {
