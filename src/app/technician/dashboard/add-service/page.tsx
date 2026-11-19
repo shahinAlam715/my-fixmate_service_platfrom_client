@@ -9,7 +9,7 @@ import toast from "react-hot-toast"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { postserviceData } from "@/all-api/serviceapi"
+import { AddService } from "@/all-api/serviceapi"
 
 type ServiceCategory =
   | "Smartphone"
@@ -173,7 +173,7 @@ export default function AddServicePage() {
       createdAt: new Date(),
     }
 
-    const Adddata = await postserviceData(serviceData)
+    const Adddata = await AddService(serviceData)
 
     console.log("Added Service:", Adddata)
 

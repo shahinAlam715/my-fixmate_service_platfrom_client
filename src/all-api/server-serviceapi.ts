@@ -21,7 +21,7 @@ export const Uniqtechniciandata = async () => {
   }
 
   const res = await fetch(
-    `${backendurl}/services/${encodeURIComponent(technicianEmail)}`,
+    `${backendurl}/services/technician/${encodeURIComponent(technicianEmail)}`,
     {
       cache: "no-store",
     }
