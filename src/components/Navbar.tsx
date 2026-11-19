@@ -212,7 +212,7 @@ function UserMenu({
 
         {/* Update Profile */}
         <DropdownMenuItem
-          render={<Link href="/profile" />}
+          render={<Link href="/update-profile" />}
         >
           <UserRound className="size-4" />
           Update Profile
@@ -387,7 +387,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/profile"
+                  href="/update-profile"
                   onClick={() => setMobileOpen(false)}
                 >
                   <Button variant="outline" className="w-full gap-2">
