@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export type DashboardRole = "customer" | "technician" | "admin";
 
@@ -92,18 +93,20 @@ export default function DashboardSidebar({
 
   const handleSignOut = async () => {
     try {
-      const { error } = await authClient.signOut();
+    const { error } = await authClient.signOut();
 
-      if (error) {
-        console.error("Sign out error:", error);
-        return;
-      }
-
-      router.push("/sign-in");
-      router.refresh();
-    } catch (error) {
-      console.error("Sign out error:", error);
+    if (error) {
+      toast.error(error.message || "Sign out failed!");
+      return;
     }
+
+    toast.success("Sign Out Successful!");
+
+    // Full page reload after sign out
+    window.location.replace("/");
+  } catch (error) {
+    toast.error("Something went wrong!");
+  }
   };
 
   return (

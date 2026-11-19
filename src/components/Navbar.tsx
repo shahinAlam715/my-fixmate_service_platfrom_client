@@ -143,7 +143,7 @@ function UserMenu({
 }: {
   user: AuthUser;
 }) {
-  const router = useRouter();
+  
 
   const role: Role =
     user.role === "technician" || user.role === "admin"
