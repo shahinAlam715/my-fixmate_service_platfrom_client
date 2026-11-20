@@ -1,26 +1,6 @@
 const backendurl = process.env.NEXT_PUBLIC_SERVER_URL
 
-// export const postserviceData = async (data: object) => {
-//   if (!backendurl) {
-//     throw new Error("Server URL is missing.")
-//   }
 
-//   const res = await fetch(`${backendurl}/services`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(data),
-//   })
-
-//   const result = await res.json()
-
-//   if (!res.ok) {
-//     throw new Error(result.message || "Failed to add service.")
-//   }
-
-//   return result
-// }
 
 
 // Common server-side API helper
@@ -38,35 +18,73 @@ const getServerUrl = () => {
 
 // Query params supported by the backend GET /services endpoint
 export interface IServiceQuery {
-  category?: string
-  search?: string
-  serviceMode?: string
-  sort?: string
+  category?: string;
+  search?: string;
+  serviceMode?: string;
+  sort?: string;
+
+  // Featured services
+  approvalStatus?: string;
+  isAvailable?: boolean;
+  limit?: number;
 }
 
 export const Allservicedata = async (params?: IServiceQuery) => {
-  const query = new URLSearchParams()
+  const query = new URLSearchParams();
 
-  if (params?.category) query.set("category", params.category)
-  if (params?.search) query.set("search", params.search)
-  if (params?.serviceMode) query.set("serviceMode", params.serviceMode)
-  if (params?.sort) query.set("sort", params.sort)
+  if (params?.category) query.set("category", params.category);
+  if (params?.search) query.set("search", params.search);
+  if (params?.serviceMode) query.set("serviceMode", params.serviceMode);
+  if (params?.sort) query.set("sort", params.sort);
 
-  const queryString = query.toString()
+  if (params?.approvalStatus)
+    query.set("approvalStatus", params.approvalStatus);
+
+  if (params?.isAvailable !== undefined)
+    query.set("isAvailable", String(params.isAvailable));
+
+  if (params?.limit !== undefined)
+    query.set("limit", String(params.limit));
+
+  const queryString = query.toString();
 
   const res = await fetch(
     `${getServerUrl()}/services${queryString ? `?${queryString}` : ""}`,
     {
       cache: "no-store",
     }
-  )
+  );
 
   if (!res.ok) {
-    throw new Error("Failed to fetch services.")
+    throw new Error("Failed to fetch services.");
   }
 
-  return res.json()
-}
+  return res.json();
+};
+
+// export const Allservicedata = async (params?: IServiceQuery) => {
+//   const query = new URLSearchParams()
+
+//   if (params?.category) query.set("category", params.category)
+//   if (params?.search) query.set("search", params.search)
+//   if (params?.serviceMode) query.set("serviceMode", params.serviceMode)
+//   if (params?.sort) query.set("sort", params.sort)
+
+//   const queryString = query.toString()
+
+//   const res = await fetch(
+//     `${getServerUrl()}/services${queryString ? `?${queryString}` : ""}`,
+//     {
+//       cache: "no-store",
+//     }
+//   )
+
+//   if (!res.ok) {
+//     throw new Error("Failed to fetch services.")
+//   }
+
+//   return res.json()
+// }
 
 // ===============================
 // GET SINGLE SERVICE

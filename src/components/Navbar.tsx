@@ -1,26 +1,15 @@
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import {
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  UserRound,
-  X,
-} from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 
 import { cn } from "cn";
 
 import Logo from "@/components/Logo";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -56,10 +45,7 @@ const DASHBOARD_ROUTES: Record<Role, string> = {
   admin: "/admin/dashboard",
 };
 
-const ROLE_BADGES: Record<
-  Role,
-  { label: string; className: string }
-> = {
+const ROLE_BADGES: Record<Role, { label: string; className: string }> = {
   customer: {
     label: "Customer",
     className: "border-blue-200 bg-blue-50 text-blue-700",
@@ -105,10 +91,8 @@ function NavLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "rounded-md text-sm font-medium transition-colors",
-        active
-          ? "text-orange-600"
-          : "text-gray-600 hover:text-orange-600",
-        className
+        active ? "text-orange-600" : "text-gray-600 hover:text-orange-600",
+        className,
       )}
     >
       {label}
@@ -138,13 +122,7 @@ function UserAvatar({
   );
 }
 
-function UserMenu({
-  user,
-}: {
-  user: AuthUser;
-}) {
-  
-
+function UserMenu({ user }: { user: AuthUser }) {
   const role: Role =
     user.role === "technician" || user.role === "admin"
       ? user.role
@@ -152,32 +130,33 @@ function UserMenu({
 
   const badge = ROLE_BADGES[role];
 
- const handleSignOut = async () => {
-  try {
-    const { error } = await authClient.signOut();
+  const handleSignOut = async () => {
+    try {
+      const { error } = await authClient.signOut();
 
-    if (error) {
-      toast.error(error.message || "Sign out failed!");
-      return;
+      if (error) {
+        toast.error(error.message || "Sign out failed!");
+        return;
+      }
+
+      toast.success("Sign Out Successful!");
+
+      // Full page reload after sign out
+      window.location.replace("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast.error("Something went wrong!");
     }
-
-    toast.success("Sign Out Successful!");
-
-    // Full page reload after sign out
-    window.location.replace("/");
-  } catch (error) {
-    console.error("Sign out error:", error);
-    toast.error("Something went wrong!");
-  }
-};
+  };
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label="Open user menu"
-        className="flex rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-orange-500"
-      >
-        <UserAvatar user={user} />
+      <DropdownMenuTrigger aria-label="Open user menu">
+        {" "}
+        <div className="flex items-center gap-4 rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-orange-500">
+          <h2>{user.name}</h2>
+          <UserAvatar user={user} />
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-64">
@@ -190,9 +169,7 @@ function UserMenu({
               {user.name}
             </p>
 
-            <p className="truncate text-xs text-gray-500">
-              {user.email}
-            </p>
+            <p className="truncate text-xs text-gray-500">{user.email}</p>
 
             <Badge className={cn("mt-1 w-fit", badge.className)}>
               {badge.label}
@@ -203,17 +180,13 @@ function UserMenu({
         <DropdownMenuSeparator />
 
         {/* Dashboard */}
-        <DropdownMenuItem
-          render={<Link href={DASHBOARD_ROUTES[role]} />}
-        >
+        <DropdownMenuItem render={<Link href={DASHBOARD_ROUTES[role]} />}>
           <LayoutDashboard className="size-4" />
           Dashboard
         </DropdownMenuItem>
 
         {/* Update Profile */}
-        <DropdownMenuItem
-          render={<Link href="/update-profile" />}
-        >
+        <DropdownMenuItem render={<Link href="/update-profile" />}>
           <UserRound className="size-4" />
           Update Profile
         </DropdownMenuItem>
@@ -221,10 +194,7 @@ function UserMenu({
         <DropdownMenuSeparator />
 
         {/* Sign Out */}
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={handleSignOut}
-        >
+        <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
           <LogOut className="size-4" />
           Sign Out
         </DropdownMenuItem>
@@ -235,7 +205,7 @@ function UserMenu({
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter()
+  const router = useRouter();
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -267,9 +237,7 @@ export default function Navbar() {
       ) : (
         <>
           <Link href="/sign-in">
-            <Button variant="outline">
-              Sign In
-            </Button>
+            <Button variant="outline">Sign In</Button>
           </Link>
 
           <Link href="/sign-up">
@@ -285,7 +253,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
-
         {/* Logo */}
         <div className="flex items-center gap-8">
           <Logo />
@@ -323,11 +290,7 @@ export default function Navbar() {
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((open) => !open)}
         >
-          {mobileOpen ? (
-            <X className="size-5" />
-          ) : (
-            <Menu className="size-5" />
-          )}
+          {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
 
@@ -357,7 +320,10 @@ export default function Navbar() {
               <>
                 {/* Mobile User Information */}
                 <div className="flex items-center gap-3">
-                  <UserAvatar user={user} />
+                  <div className="flex items-center gap-4 rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-orange-500">
+                    <h2>{user.name}</h2>
+                    <UserAvatar user={user} />
+                  </div>
 
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-gray-900">
@@ -422,19 +388,13 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link
-                  href="/sign-in"
-                  onClick={() => setMobileOpen(false)}
-                >
+                <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
                   <Button variant="outline" className="w-full">
                     Sign In
                   </Button>
                 </Link>
 
-                <Link
-                  href="/sign-up"
-                  onClick={() => setMobileOpen(false)}
-                >
+                <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-orange-600 text-white hover:bg-orange-700">
                     Sign Up
                   </Button>

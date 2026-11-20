@@ -66,7 +66,6 @@ export default function SignUpPage() {
   try {
     const { data, error } = await authClient.signUp.email({
       ...userData,
-      callbackURL: "/",
     });
 
     // Check Better Auth error
@@ -81,7 +80,7 @@ export default function SignUpPage() {
       console.log("Signup Data:", data);
     }
     // Full page reload after sign up
-    window.location.replace("/");
+    window.location.replace(`${role}/dashboard`);
   } catch (err) {
     console.error("Unexpected Signup Error:", err);
     toast.error("Something went wrong. Please try again.");

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 
 /** Official Google "G" logo (4-color). */
@@ -34,6 +34,8 @@ function GoogleIcon() {
 
 export default function SignInPage() {
 
+  const session = useSession()
+
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
@@ -60,7 +62,7 @@ export default function SignInPage() {
       toast.success("Signin Successful!");
     }
     // Full page reload after sign in
-    window.location.replace("/");
+   window.location.replace(`/`);
   } catch (err) {
     toast.error("Something went wrong. Please try again.");
   }

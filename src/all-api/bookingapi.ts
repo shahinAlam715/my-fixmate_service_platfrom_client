@@ -117,9 +117,30 @@ export const getMyBookings = async (customerEmail: string) => {
 // GET TECHNICIAN BOOKINGS
 // GET /bookings/technician
 // ================================
-export const getTechnicianBookings = async (): Promise<IBooking[]> => {
-  return bookingFetch("/bookings/technician");
+
+export const getTechnicianBookings = async (
+  technicianEmail: string
+): Promise<IBooking[]> => {
+  return bookingFetch(
+    `/bookings/technician?technicianEmail=${encodeURIComponent(
+      technicianEmail
+    )}`
+  );
 };
+
+// export const updateBookingStatus = async (
+//   bookingId: string,
+//   data: { status: string }
+// ) => {
+//   return bookingFetch(`/bookings/${bookingId}/status`, {
+//     method: "PATCH",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(data),
+//   });
+// };
+
 
 // ================================
 // UPDATE BOOKING STATUS
@@ -130,13 +151,27 @@ export interface IUpdateBookingStatus {
   finalAmount?: number;
 }
 
+// export const updateBookingStatus = async (
+//   bookingId: string,
+//   statusData: IUpdateBookingStatus
+// ) => {
+//   return bookingFetch(`/bookings/${bookingId}/status`, {
+//     method: "PATCH",
+//     body: JSON.stringify(statusData),
+//   });
+// };
+
+
 export const updateBookingStatus = async (
   bookingId: string,
-  statusData: IUpdateBookingStatus
+  data: { status: string }
 ) => {
   return bookingFetch(`/bookings/${bookingId}/status`, {
     method: "PATCH",
-    body: JSON.stringify(statusData),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
   });
 };
 
