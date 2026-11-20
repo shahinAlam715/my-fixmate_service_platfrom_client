@@ -8,10 +8,12 @@ import { ArrowLeft, PackageOpen } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { SingleServicedata } from "@/all-api/serviceapi"
+import { createBooking } from "@/all-api/bookingapi"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { useSession } from "@/lib/auth-client"
 
 interface IService {
   _id: string
@@ -74,6 +76,8 @@ function DetailSkeleton() {
 export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>()
 
+  const { data: session, isPending: sessionLoading } = useSession()
+
   const [service, setService] = useState<IService | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +89,7 @@ export default function ServiceDetailPage() {
     date: "",
     description: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const requestIdRef = useRef(0)
 
@@ -135,49 +140,102 @@ export default function ServiceDetailPage() {
     }))
   }
 
-  // Booking request — client-side validation only until a backend
-  // booking endpoint exists.
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  // Booking request — POSTs to the backend /bookings endpoint.
+ // ================================
+// BOOKING REQUEST
+// ================================
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const phone = form.phone.trim()
-    const address = form.address.trim()
-    const description = form.description.trim()
-    const today = new Date().toISOString().slice(0, 10)
+  if (isSubmitting) return;
 
-    if (!phone) {
-      toast.error("Please enter your phone number.")
-      return
-    }
-
-    if (!/^[0-9+\-\s]{7,}$/.test(phone)) {
-      toast.error("Please enter a valid phone number.")
-      return
-    }
-
-    if (!address) {
-      toast.error("Please enter your address.")
-      return
-    }
-
-    if (!form.date) {
-      toast.error("Please choose a preferred date.")
-      return
-    }
-
-    if (form.date < today) {
-      toast.error("Please choose today or a later date.")
-      return
-    }
-
-    if (description.length < 20) {
-      toast.error("Problem description must be at least 20 characters.")
-      return
-    }
-
-    toast.success("Repair request sent!")
-    setForm({ phone: "", address: "", date: "", description: "" })
+  // Check login
+  if (sessionLoading) {
+    toast.error("Please wait, session is loading.");
+    return;
   }
+
+  if (!session?.user?.email) {
+    toast.error("Please login to request a repair.");
+    return;
+  }
+
+  const phone = form.phone.trim();
+  const address = form.address.trim();
+  const description = form.description.trim();
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Validate phone
+  if (!phone) {
+    toast.error("Please enter your phone number.");
+    return;
+  }
+
+  if (!/^[0-9+\-\s]{7,}$/.test(phone)) {
+    toast.error("Please enter a valid phone number.");
+    return;
+  }
+
+  // Validate address
+  if (!address) {
+    toast.error("Please enter your address.");
+    return;
+  }
+
+  // Validate date
+  if (!form.date) {
+    toast.error("Please choose a preferred date.");
+    return;
+  }
+
+  if (form.date < today) {
+    toast.error("Please choose today or a later date.");
+    return;
+  }
+
+  // Validate description
+  if (description.length < 20) {
+    toast.error(
+      "Problem description must be at least 20 characters."
+    );
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const result = await createBooking({
+      serviceId: id,
+      customerEmail: session.user.email,
+      customerPhone: phone,
+      address,
+      preferredDate: form.date,
+      problemDescription: description,
+    });
+
+    toast.success(
+      result?.message || "Booking request sent successfully!"
+    );
+
+    setForm({
+      phone: "",
+      address: "",
+      date: "",
+      description: "",
+    });
+  } catch (err: unknown) {
+    console.error("Failed to create booking:", err);
+
+    toast.error(
+      err instanceof Error
+        ? err.message
+        : "Failed to send booking request."
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (isLoading) {
     return <DetailSkeleton />
@@ -387,11 +445,16 @@ export default function ServiceDetailPage() {
 
               {/* Submit */}
               <Button
-                type="submit"
-                className="h-10 w-full bg-orange-600 text-white hover:bg-orange-700"
-              >
-                Request Repair
-              </Button>
+  type="submit"
+  disabled={isSubmitting || sessionLoading}
+  className="h-10 w-full bg-orange-600 text-white hover:bg-orange-700"
+>
+  {isSubmitting
+    ? "Sending..."
+    : sessionLoading
+      ? "Loading session..."
+      : "Request Repair"}
+</Button>
             </form>
           </div>
         </aside>

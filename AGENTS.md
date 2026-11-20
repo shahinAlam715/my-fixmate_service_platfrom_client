@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project
 
-Single-package Next.js 16.4.6 (App Router) client app. React 19, TypeScript strict, Tailwind CSS v4, shadcn/ui. No monorepo, no test runner, no CI.
+Single-package Next.js 16.4.6 (App Router) client app. React 19, TypeScript strict, Tailwind CSS v4, shadcn/ui. No monorepo, no test runner, no CI. The stock `README.md` is stale (points at `app/page.tsx`, which doesn't exist — pages live under `src/app/`); don't follow it.
 
 **This repo is frontend only.** All business data is fetched from a separate backend repo running at `NEXT_PUBLIC_SERVER_URL` (`http://localhost:5000` in `.env`); data pages fail without it. Auth (better-auth + MongoDB Atlas + Google OAuth) is served by this app itself.
 
@@ -27,7 +27,7 @@ Verify with `npx tsc --noEmit` then `npm run lint`.
 
 **Typecheck quirk:** `src/app/layout.tsx` uses the generated type `LayoutProps<"/">`, declared only in `.next/types/routes.d.ts`. On a fresh clone with no `.next/`, `tsc --noEmit` fails until `next build` or `next dev` has run once.
 
-**Lint quirk:** `npm run lint` currently exits 1 on two pre-existing `react-hooks/set-state-in-effect` errors in `src/hooks/use-mobile.ts` and `src/components/ui/carousel.tsx` (plus ~9 warnings). These are not your regression — check for *new* errors only.
+**Lint quirk:** `npm run lint` currently exits 1 on two pre-existing `react-hooks/set-state-in-effect` errors in `src/hooks/use-mobile.ts` and `src/components/ui/carousel.tsx` (plus 9 warnings). These are not your regression — check for *new* errors only.
 
 ## Environment
 
@@ -38,7 +38,7 @@ Verify with `npx tsc --noEmit` then `npm run lint`.
 - `src/app/(public)/` — public pages behind Navbar+Footer: `/`, `/about`, `/services`, `/sign-in`, `/sign-up`, `/update-profile`
 - `src/app/{customer,technician,admin}/dashboard/` — three role dashboards; each `layout.tsx` renders `<DashboardSidebar role="...">`. Add/remove sidebar links only in `NAV_ITEMS` in `src/components/DashboardSidebar.tsx`.
 - `src/app/api/auth/[...all]/route.ts` — better-auth handler. Config in `src/lib/auth.ts` (roles `customer|technician|admin` as an additional user field); browser client in `src/lib/auth-client.ts`. Server-side session: `auth.api.getSession({ headers: await headers() })`.
-- `src/all-api/` — fetch helpers for the backend: `server-serviceapi.ts` is `server-only` and session-aware; `serviceapi.ts` / `userapi.ts` are plain `fetch` calls (mostly commented-out in favor of server helpers).
+- `src/all-api/` — fetch helpers for the backend: `server-serviceapi.ts` is `server-only` and session-aware; `serviceapi.ts` / `userapi.ts` are plain `fetch` calls actively imported by pages (some legacy functions commented out inside `serviceapi.ts`); `bookingapi.ts` exists but is imported nowhere.
 - `src/components/ui/` — 60+ shadcn-generated primitives; hand-edit only when intentional
 - `src/components/*.tsx` — app components (`Navbar`, `Footer`, `DashboardSidebar`, ...)
 - `src/hooks/`, `src/lib/` — shared hooks; `src/lib/utils.ts` re-exports `cn`
