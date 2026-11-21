@@ -1,9 +1,12 @@
-import "server-only"
+"user server"
 
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 
-const backendurl = process.env.NEXT_PUBLIC_SERVER_URL
+
+
+const backendurl = process.env.NEXT_PUBLIC_SERVER_URL 
+
 
 export const Uniqtechniciandata = async () => {
   if (!backendurl) {

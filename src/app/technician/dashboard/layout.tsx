@@ -1,11 +1,15 @@
 import type { ReactNode } from "react";
 
 import DashboardSidebar from "@/components/DashboardSidebar";
+import { requerRole } from "@/lib/core";
 
-export default function TechnicianDashboardLayout({
+export default async function TechnicianDashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  return <DashboardSidebar role="technician">{children}</DashboardSidebar>;
+  await requerRole("technician")
+  return <DashboardSidebar role="technician">{children}</DashboardSidebar>
+  
+  ;
 }

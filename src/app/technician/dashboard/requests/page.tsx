@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import {
   CheckCircle2,
   Loader2,
@@ -17,6 +17,16 @@ import {
 } from "@/all-api/bookingapi";
 
 import type { IBooking } from "@/all-api/bookingapi";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // ========================================
 // TYPES
@@ -88,6 +98,12 @@ export default function ManageRequestsPage() {
   const [activeFilter, setActiveFilter] =
     useState<FilterStatus>("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // "Mark as complete" dialog state
+  const [completeTarget, setCompleteTarget] =
+    useState<IBooking | null>(null);
+  const [finalAmount, setFinalAmount] = useState("");
+  const [amountError, setAmountError] = useState("");
 
   // ========================================
   // INITIAL FETCH
@@ -211,14 +227,6 @@ export default function ManageRequestsPage() {
       if (!confirmed) return;
     }
 
-    if (newStatus === "completed") {
-      const confirmed = window.confirm(
-        "Are you sure you want to mark this service as completed?"
-      );
-
-      if (!confirmed) return;
-    }
-
     try {
       setUpdatingId(booking._id);
       setError("");
@@ -241,6 +249,72 @@ export default function ManageRequestsPage() {
         err instanceof Error
           ? err.message
           : "Failed to update booking status"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // ========================================
+  // OPEN "MARK AS COMPLETE" DIALOG
+  // Default amount comes from the API (basePrice)
+  // ========================================
+
+  const openCompleteDialog = (booking: IBooking) => {
+    if (updatingId) return;
+
+    setAmountError("");
+    setFinalAmount(
+      booking.finalAmount > 0
+        ? String(booking.finalAmount)
+        : String(booking.basePrice ?? "")
+    );
+    setCompleteTarget(booking);
+  };
+
+  // ========================================
+  // SUBMIT COMPLETION + FINAL AMOUNT
+  // PATCH /bookings/:id/status
+  // ========================================
+
+  const handleCompleteSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!completeTarget || updatingId) return;
+
+    const amount = Number(finalAmount);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setAmountError("Please enter a valid amount greater than 0.");
+      return;
+    }
+
+    try {
+      setUpdatingId(completeTarget._id);
+      setAmountError("");
+      setError("");
+
+      await updateBookingStatus(completeTarget._id, {
+        status: "completed",
+        finalAmount: amount,
+      });
+
+      setBookings((prev) =>
+        prev.map((item) =>
+          item._id === completeTarget._id
+            ? { ...item, status: "completed", finalAmount: amount }
+            : item
+        )
+      );
+
+      setCompleteTarget(null);
+    } catch (err: unknown) {
+      console.error("Complete booking error:", err);
+
+      setAmountError(
+        err instanceof Error
+          ? err.message
+          : "Failed to mark booking as completed"
       );
     } finally {
       setUpdatingId(null);
@@ -429,7 +503,7 @@ export default function ManageRequestsPage() {
 
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-[940px]">
 
               {/* HEADER */}
 
@@ -449,6 +523,14 @@ export default function ManageRequestsPage() {
 
                   <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase text-slate-600">
                     Status
+                  </th>
+
+                  <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase text-slate-600">
+                    Amount
+                  </th>
+
+                  <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase text-slate-600">
+                    Payment
                   </th>
 
                   <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase text-slate-600">
@@ -497,6 +579,32 @@ export default function ManageRequestsPage() {
                       <StatusBadge status={booking.status} />
                     </td>
 
+                    {/* AMOUNT */}
+
+                    <td className="px-3 py-3 text-sm font-medium text-slate-800">
+                      {booking.finalAmount > 0
+                        ? `$${booking.finalAmount}`
+                        : booking.basePrice > 0
+                          ? `$${booking.basePrice}`
+                          : "—"}
+                    </td>
+
+                    {/* PAYMENT STATUS */}
+
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                          booking.paymentStatus === "paid"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {booking.paymentStatus === "paid"
+                          ? "Paid"
+                          : "Unpaid"}
+                      </span>
+                    </td>
+
                     {/* ACTIONS */}
 
                     <td className="px-3 py-3">
@@ -504,6 +612,7 @@ export default function ManageRequestsPage() {
                         booking={booking}
                         updatingId={updatingId}
                         onUpdate={handleStatusUpdate}
+                        onCompleteClick={openCompleteDialog}
                       />
                     </td>
                   </tr>
@@ -526,6 +635,109 @@ export default function ManageRequestsPage() {
             </div>
           )}
         </div>
+
+        {/* ========================================
+            MARK AS COMPLETE DIALOG
+            ======================================== */}
+
+        <Dialog
+          open={!!completeTarget}
+          onOpenChange={(open) => {
+            if (!open && !updatingId) {
+              setCompleteTarget(null);
+              setAmountError("");
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <form onSubmit={handleCompleteSubmit} className="space-y-4">
+              <DialogHeader>
+                <DialogTitle>Mark as Complete</DialogTitle>
+
+                <DialogDescription>
+                  Set the final amount for this service, then confirm
+                  completion. The customer will see this amount.
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* SERVICE SUMMARY */}
+
+              {completeTarget && (
+                <div className="space-y-1 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                  <p className="font-medium text-slate-800">
+                    {completeTarget.serviceTitle || "Repair Service"}
+                  </p>
+
+                  <p className="text-xs text-slate-500">
+                    {completeTarget.customerName || "Customer"} · Default
+                    amount: ${completeTarget.basePrice ?? 0}
+                  </p>
+                </div>
+              )}
+
+              {/* FINAL AMOUNT */}
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="final-amount"
+                  className="text-sm font-medium text-slate-800"
+                >
+                  Final Amount (USD)
+                </label>
+
+                <input
+                  id="final-amount"
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={finalAmount}
+                  onChange={(e) => {
+                    setFinalAmount(e.target.value);
+                    setAmountError("");
+                  }}
+                  placeholder="e.g. 45"
+                  required
+                  autoFocus
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+
+                {amountError && (
+                  <p className="text-xs font-medium text-red-600">
+                    {amountError}
+                  </p>
+                )}
+              </div>
+
+              {/* ACTIONS */}
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCompleteTarget(null)}
+                  disabled={!!updatingId}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={!!updatingId}
+                  className="bg-orange-600 text-white hover:bg-orange-700"
+                >
+                  {updatingId ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Completing...
+                    </>
+                  ) : (
+                    "Confirm Complete"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
@@ -555,10 +767,12 @@ function ActionButtons({
   booking,
   updatingId,
   onUpdate,
+  onCompleteClick,
 }: {
   booking: IBooking;
   updatingId: string | null;
   onUpdate: (booking: IBooking, status: BookingStatus) => void;
+  onCompleteClick: (booking: IBooking) => void;
 }) {
   const isUpdating = updatingId === booking._id;
 
@@ -617,13 +831,13 @@ function ActionButtons({
     return (
       <button
         disabled={isUpdating}
-        onClick={() => onUpdate(booking, "completed")}
+        onClick={() => onCompleteClick(booking)}
         className={`${buttonClass} bg-orange-700 text-white hover:bg-orange-800`}
       >
         {isUpdating ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         ) : (
-          "Mark Completed"
+          "Mark as Complete"
         )}
       </button>
     );

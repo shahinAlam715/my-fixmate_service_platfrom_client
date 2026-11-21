@@ -32,6 +32,7 @@ const NAV_ITEMS: Record<DashboardRole, { label: string; slug: string }[]> = {
     { label: "Add Service", slug: "add-service" },
     { label: "My Services", slug: "my-services" },
     { label: "Requests", slug: "requests" },
+    { label: "My Earnings", slug: "my-earnings" },
     { label: "Update Profile", slug: "update-profile" },
   ],
   admin: [

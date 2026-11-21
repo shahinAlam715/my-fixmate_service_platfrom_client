@@ -141,20 +141,42 @@ export default function MyBookings({
     }
   };
 
-  const renderAction = (booking: IBooking) =>
-    booking.status === "requested" ? (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => setCancelTarget(booking)}
-        disabled={isCancelling}
-      >
-        Cancel
-      </Button>
-    ) : (
-      <span className="text-muted-foreground">—</span>
-    );
+  // Pay Now — visible only when the job is completed but not yet paid.
+  // Navigates to the Stripe payment page for this booking.
+  const handlePayNow = (booking: IBooking) => {
+    router.push(`/stripepayment?id=${booking._id}`);
+  };
+
+  const renderAction = (booking: IBooking) => {
+    if (booking.status === "requested") {
+      return (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setCancelTarget(booking)}
+          disabled={isCancelling}
+        >
+          Cancel
+        </Button>
+      );
+    }
+
+    if (booking.status === "completed" && booking.paymentStatus !== "paid") {
+      return (
+        <Button
+          type="button"
+          size="sm"
+          onClick={() => handlePayNow(booking)}
+          className="bg-orange-600 text-white hover:bg-orange-700"
+        >
+          Pay Now
+        </Button>
+      );
+    }
+
+    return <span className="text-muted-foreground">—</span>;
+  };
 
   // ===============================
   // Load failed

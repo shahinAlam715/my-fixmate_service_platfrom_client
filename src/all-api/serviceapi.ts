@@ -1,6 +1,6 @@
+"use server"
+
 const backendurl = process.env.NEXT_PUBLIC_SERVER_URL
-
-
 
 
 // Common server-side API helper
@@ -30,6 +30,9 @@ export interface IServiceQuery {
 }
 
 export const Allservicedata = async (params?: IServiceQuery) => {
+
+  
+
   const query = new URLSearchParams();
 
   if (params?.category) query.set("category", params.category);
@@ -52,6 +55,7 @@ export const Allservicedata = async (params?: IServiceQuery) => {
     `${getServerUrl()}/services${queryString ? `?${queryString}` : ""}`,
     {
       cache: "no-store",
+     
     }
   );
 

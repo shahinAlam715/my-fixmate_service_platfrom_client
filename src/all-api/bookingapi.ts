@@ -164,7 +164,7 @@ export interface IUpdateBookingStatus {
 
 export const updateBookingStatus = async (
   bookingId: string,
-  data: { status: string }
+  data: { status: string; finalAmount?: number }
 ) => {
   return bookingFetch(`/bookings/${bookingId}/status`, {
     method: "PATCH",

@@ -156,7 +156,7 @@ export default function ServiceDetailPage() {
     }
 
     if (!session?.user?.email) {
-      toast.error("Please login to request a repair.");
+      router.push("/sign-in");
       return;
     }
 
