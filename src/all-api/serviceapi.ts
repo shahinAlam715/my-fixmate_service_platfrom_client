@@ -53,29 +53,6 @@ export const Allservicedata = async (params?: IServiceQuery) => {
   return res.json();
 };
 
-// export const Allservicedata = async (params?: IServiceQuery) => {
-//   const query = new URLSearchParams()
-
-//   if (params?.category) query.set("category", params.category)
-//   if (params?.search) query.set("search", params.search)
-//   if (params?.serviceMode) query.set("serviceMode", params.serviceMode)
-//   if (params?.sort) query.set("sort", params.sort)
-
-//   const queryString = query.toString()
-
-//   const res = await fetch(
-//     `${getServerUrl()}/services${queryString ? `?${queryString}` : ""}`,
-//     {
-//       cache: "no-store",
-//     }
-//   )
-
-//   if (!res.ok) {
-//     throw new Error("Failed to fetch services.")
-//   }
-
-//   return res.json()
-// }
 
 // ===============================
 // GET SINGLE SERVICE

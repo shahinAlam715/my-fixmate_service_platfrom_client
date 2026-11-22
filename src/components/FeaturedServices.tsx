@@ -7,11 +7,10 @@ import {
   ArrowRight,
   MapPin,
   UserRound,
-  Loader2,
   Wrench,
-  DatabaseBackupIcon,
 } from "lucide-react";
 import { Allservicedata } from "@/all-api/serviceapi";
+import Image from "next/image";
 
 
 // ================================
@@ -211,9 +210,11 @@ console.log("feauters service");
                   {/* IMAGE */}
                   <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
                     {image ? (
-                      <img
+                      <Image
                         src={image}
                         alt={getServiceTitle(service)}
+                        height={400}
+                        width={400}
                         className="h-full w-full object-cover transition duration-500 hover:scale-105"
                       />
                     ) : (
