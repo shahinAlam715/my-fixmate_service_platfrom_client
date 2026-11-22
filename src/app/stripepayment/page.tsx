@@ -50,7 +50,7 @@ export default function StripePaymentPage() {
 
     let cancelled = false;
 
-    getMyBookings(customerEmail)
+    getMyBookings()
       .then((payload: unknown) => {
         if (cancelled) return;
 
@@ -99,21 +99,20 @@ export default function StripePaymentPage() {
     setIsPaying(true);
 
     try {
-      const res = await fetch("/api/checkout_sessions", {
+      const res = await fetch("/api/payments/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: booking.finalAmount || booking.basePrice,
           bookingId: booking._id,
           serviceName: booking.serviceTitle,
-          customerEmail: customerEmail || "",
         }),
       });
 
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.url) {
-        throw new Error(data?.error || "Could not start checkout.");
+        throw new Error(data?.message || data?.error || "Could not start checkout.");
       }
 
       window.location.href = data.url as string;

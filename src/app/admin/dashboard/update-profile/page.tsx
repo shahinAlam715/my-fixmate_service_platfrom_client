@@ -204,16 +204,24 @@ function ProfileForm({
     setIsLoading(true)
 
     try {
-      const { error } = await authClient.updateUser({
-        name: formData.name.trim(),
-        image: uploadedImageUrl || "",
-        phone: formData.phone.trim(),
-        area: formData.area.trim(),
-        bio: formData.bio.trim(),
+      const res = await fetch("/api/users/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          image: uploadedImageUrl || "",
+          phone: formData.phone.trim(),
+          area: formData.area.trim(),
+          bio: formData.bio.trim(),
+        }),
       })
 
-      if (error) {
-        toast.error(error.message || "Failed to update your profile.")
+      const result = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        toast.error(result?.message || "Failed to update your profile.")
         return
       }
 

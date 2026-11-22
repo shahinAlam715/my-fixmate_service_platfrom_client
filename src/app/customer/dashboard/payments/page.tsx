@@ -85,7 +85,7 @@ export default function PaymentsPage() {
 
     let cancelled = false;
 
-    getMyPayments(customerEmail)
+    getMyPayments()
       .then((payload: unknown) => {
         if (cancelled) return;
 

@@ -118,7 +118,7 @@ export default function AdminBookingsPage() {
 
     let cancelled = false;
 
-    getAllBookings(adminEmail)
+    getAllBookings()
       .then((data) => {
         if (cancelled) return;
 
@@ -184,7 +184,7 @@ export default function AdminBookingsPage() {
       setAcceptingId(bookingId);
       setActionError("");
 
-      await adminAcceptRejectedBooking(bookingId, adminEmail);
+      await adminAcceptRejectedBooking(bookingId);
 
       // Update UI without reloading
       setBookings((prevBookings) =>

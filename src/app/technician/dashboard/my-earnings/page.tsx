@@ -85,7 +85,7 @@ export default function MyEarningsPage() {
 
     let cancelled = false;
 
-    getTechnicianEarnings(technicianEmail)
+    getTechnicianEarnings()
       .then((payload: unknown) => {
         if (cancelled) return;
 

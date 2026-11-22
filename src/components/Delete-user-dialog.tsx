@@ -26,8 +26,6 @@ interface DeleteUserDialogProps {
   disabled?: boolean;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_SERVER_URL;
-
 export default function DeleteUserDialog({
   userId,
   userName,
@@ -40,11 +38,6 @@ export default function DeleteUserDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!API_URL) {
-      toast.error("Server API URL is missing.");
-      return;
-    }
-
     if (userEmail === currentUserEmail) {
       toast.error("You cannot delete your own account.");
       return;
@@ -53,7 +46,8 @@ export default function DeleteUserDialog({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`${API_URL}/users/${userId}`, {
+      // jwt-secured /api layer (admin session enforced by the route)
+      const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
       });
 

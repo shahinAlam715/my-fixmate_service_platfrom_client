@@ -9,6 +9,7 @@ import {
   UserRound,
   Loader2,
   Wrench,
+  DatabaseBackupIcon,
 } from "lucide-react";
 import { Allservicedata } from "@/all-api/serviceapi";
 
@@ -84,7 +85,7 @@ export default function FeaturedServices() {
   // ================================
   useEffect(() => {
     let cancelled = false;
-
+console.log("feauters service");
     Allservicedata({
       approvalStatus: "approved",
       isAvailable: true,
@@ -93,7 +94,7 @@ export default function FeaturedServices() {
     })
       .then((data) => {
         if (cancelled) return;
-
+        console.log(data);
         setServices(Array.isArray(data) ? data : []);
         setError("");
       })

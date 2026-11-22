@@ -28,12 +28,34 @@ export const getToken = async()=>{
 }
 
 export const authFetch = async(api: string)=>{
+    console.log("authFetch");
     const token = await getToken()
+    console.log(token)
 
     const res = await fetch(api,{
         headers:{
-            "authorization" : `Bearer ${token}`
+            authorization : `Bearer ${token}`
         }
     })
+    if (res.status === 401 || res.status === 403) {
+            redirect("/unauthorized-user")
+        }
     return res
+}
+
+export const protectMutation = async(api: string,  method: string, data?: unknown)=>{
+        const token = await getToken()
+
+        const res = await fetch(api,{
+            method: method,
+            headers:{
+                "Content-Type": "application/json",
+                authorization : `Bearer ${token}`
+            },
+            body:data ? JSON.stringify(data) : null
+        })
+         if (res.status === 401 || res.status === 403) {
+            redirect("/unauthorized-user")
+        }
+        return res
 }

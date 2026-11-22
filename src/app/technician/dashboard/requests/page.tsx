@@ -114,7 +114,7 @@ export default function ManageRequestsPage() {
 
     let cancelled = false;
 
-    getTechnicianBookings(technicianEmail)
+    getTechnicianBookings()
       .then((data) => {
         if (cancelled) return;
 
@@ -154,7 +154,7 @@ export default function ManageRequestsPage() {
       setLoading(true);
       setError("");
 
-      const data = await getTechnicianBookings(technicianEmail);
+      const data = await getTechnicianBookings();
 
       setBookings(Array.isArray(data) ? data : []);
     } catch (err: unknown) {

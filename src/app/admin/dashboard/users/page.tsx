@@ -30,8 +30,6 @@ interface IUser {
   bio?: string
 }
 
-const API_URL = process.env.NEXT_PUBLIC_SERVER_URL
-
 const roleStyles: Record<UserRole, string> = {
   customer: "bg-blue-100 text-blue-700",
   technician: "bg-amber-100 text-amber-700",
@@ -75,15 +73,10 @@ export default function UsersPage() {
     userId: string,
     newRole: UserRole
   ) => {
-    if (!API_URL) {
-      toast.error("Server API URL is missing.")
-      return
-    }
-
     setUpdatingId(userId)
 
     try {
-      const response = await fetch(`${API_URL}/users/${userId}/role`, {
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

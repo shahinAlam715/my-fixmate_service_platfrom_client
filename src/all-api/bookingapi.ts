@@ -1,9 +1,6 @@
 // src/lib/api.ts
 
-// ================================
-// API BASE URL
-// ================================
-const API_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+import { callApi } from "@/lib/call-api"
 
 // ================================
 // Booking Type
@@ -59,15 +56,14 @@ export interface ICreateBooking {
 // ================================
 // API Fetch Helper
 // ================================
+// Routes through this app's own JWT-secured /api/* handlers (see
+// src/lib/api.ts), which derive identity from the session and
+// forward the request to the backend.
 const bookingFetch = async (
   endpoint: string,
   options: RequestInit = {}
 ) => {
-  if (!API_URL) {
-    throw new Error("Server URL is missing");
-  }
-
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  const res = await callApi(`/api${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -99,48 +95,20 @@ export const createBooking = async (
 
 // ================================
 // GET CUSTOMER BOOKINGS
-// GET /bookings/my-bookings?customerEmail=
+// GET /api/bookings/my (email comes from the session)
 // ================================
-export const getMyBookings = async (customerEmail: string) => {
-  const res = await fetch(
-    `${API_URL}/bookings/my-bookings?customerEmail=${encodeURIComponent(customerEmail)}`
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to get my bookings");
-  }
-
-  return res.json();
+export const getMyBookings = async () => {
+  return bookingFetch("/bookings/my");
 };
 
 // ================================
 // GET TECHNICIAN BOOKINGS
-// GET /bookings/technician
+// GET /api/bookings/technician (email comes from the session)
 // ================================
 
-export const getTechnicianBookings = async (
-  technicianEmail: string
-): Promise<IBooking[]> => {
-  return bookingFetch(
-    `/bookings/technician?technicianEmail=${encodeURIComponent(
-      technicianEmail
-    )}`
-  );
+export const getTechnicianBookings = async (): Promise<IBooking[]> => {
+  return bookingFetch("/bookings/technician");
 };
-
-// export const updateBookingStatus = async (
-//   bookingId: string,
-//   data: { status: string }
-// ) => {
-//   return bookingFetch(`/bookings/${bookingId}/status`, {
-//     method: "PATCH",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(data),
-//   });
-// };
-
 
 // ================================
 // UPDATE BOOKING STATUS
@@ -151,15 +119,6 @@ export interface IUpdateBookingStatus {
   finalAmount?: number;
 }
 
-// export const updateBookingStatus = async (
-//   bookingId: string,
-//   statusData: IUpdateBookingStatus
-// ) => {
-//   return bookingFetch(`/bookings/${bookingId}/status`, {
-//     method: "PATCH",
-//     body: JSON.stringify(statusData),
-//   });
-// };
 
 
 export const updateBookingStatus = async (
@@ -177,15 +136,11 @@ export const updateBookingStatus = async (
 
 // ================================
 // CANCEL BOOKING
-// PATCH /bookings/:id/cancel
+// PATCH /api/bookings/:id/cancel (customerEmail comes from the session)
 // ================================
-export const cancelBooking = async (
-  bookingId: string,
-  customerEmail: string
-) => {
+export const cancelBooking = async (bookingId: string) => {
   return bookingFetch(`/bookings/${bookingId}/cancel`, {
     method: "PATCH",
-    body: JSON.stringify({ customerEmail }),
   });
 };
 
@@ -195,28 +150,22 @@ export const cancelBooking = async (
 
 // ================================
 // ADMIN - GET ALL BOOKINGS
-// GET /bookings/admin
+// GET /api/admin/bookings (admin session enforced by the route)
 // ================================
 
-export const getAllBookings = async (
-  adminEmail: string
-): Promise<IBooking[]> => {
-  return bookingFetch(
-    `/bookings/admin?email=${encodeURIComponent(adminEmail)}`
-  );
+export const getAllBookings = async (): Promise<IBooking[]> => {
+  return bookingFetch("/admin/bookings");
 };
 
 // ================================
 // ADMIN - ACCEPT REJECTED BOOKING
-// PATCH /bookings/:id/admin-accept
+// PATCH /api/bookings/:id/admin-accept (admin session enforced by the route)
 // ================================
 
 export const adminAcceptRejectedBooking = async (
-  bookingId: string,
-  adminEmail: string
+  bookingId: string
 ) => {
   return bookingFetch(`/bookings/${bookingId}/admin-accept`, {
     method: "PATCH",
-    body: JSON.stringify({ adminEmail }),
   });
 };

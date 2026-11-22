@@ -53,7 +53,7 @@ export default async function MyBookingsPage() {
     loadError = "You are not signed in. Please sign in to view your bookings.";
   } else {
     try {
-      bookings = normalizeBookings(await getMyBookings(customerEmail));
+      bookings = normalizeBookings(await getMyBookings());
     } catch (error) {
       console.error("Failed to fetch my bookings:", error);
       loadError =
@@ -104,7 +104,6 @@ export default async function MyBookingsPage() {
 
       <MyBookings
         bookings={bookings}
-        customerEmail={customerEmail}
         error={loadError}
       />
     </div>

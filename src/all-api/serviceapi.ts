@@ -1,16 +1,6 @@
 "use server"
 
-const backendurl = process.env.NEXT_PUBLIC_SERVER_URL
-
-
-// Common server-side API helper
-const getServerUrl = () => {
-  if (!backendurl) {
-    throw new Error("Server URL is missing.")
-  }
-
-  return backendurl
-}
+import { callApi } from "@/lib/call-api"
 
 // ===============================
 // GET ALL APPROVED SERVICES
@@ -31,7 +21,7 @@ export interface IServiceQuery {
 
 export const Allservicedata = async (params?: IServiceQuery) => {
 
-  
+ 
 
   const query = new URLSearchParams();
 
@@ -51,13 +41,10 @@ export const Allservicedata = async (params?: IServiceQuery) => {
 
   const queryString = query.toString();
 
-  const res = await fetch(
-    `${getServerUrl()}/services${queryString ? `?${queryString}` : ""}`,
-    {
-      cache: "no-store",
-     
-    }
-  );
+  // jwt-secured /api layer (session forwarded, see src/lib/api.ts)
+  const api = `/api/services${queryString ? `?${queryString}` : ""}`
+
+  const res = await callApi(api);
 
   if (!res.ok) {
     throw new Error("Failed to fetch services.");
@@ -95,9 +82,10 @@ export const Allservicedata = async (params?: IServiceQuery) => {
 // ===============================
 
 export const SingleServicedata = async (id: string) => {
-  const res = await fetch(`${getServerUrl()}/services/${id}`, {
-    cache: "no-store",
-  })
+  const api = `/api/services/${id}`
+
+  const res = await callApi(api);
+  
 
   if (!res.ok) {
     throw new Error("Failed to fetch service details.")
@@ -112,7 +100,7 @@ export const SingleServicedata = async (id: string) => {
 // ===============================
 
 export const AddService = async (data: Record<string, unknown>) => {
-  const res = await fetch(`${getServerUrl()}/services`, {
+  const res = await callApi("/api/services", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -135,7 +123,7 @@ export const UpdateService = async (
   id: string,
   data: Record<string, unknown>
 ) => {
-  const res = await fetch(`${getServerUrl()}/services/${id}`, {
+  const res = await callApi(`/api/services/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -155,7 +143,7 @@ export const UpdateService = async (
 // ===============================
 
 export const DeleteService = async (id: string) => {
-  const res = await fetch(`${getServerUrl()}/services/${id}`, {
+  const res = await callApi(`/api/services/${id}`, {
     method: "DELETE",
   })
 
@@ -174,7 +162,7 @@ export const UpdateServiceAvailability = async (
   id: string,
   isAvailable: boolean
 ) => {
-  const res = await fetch(`${getServerUrl()}/services/${id}/availability`, {
+  const res = await callApi(`/api/services/${id}/availability`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -192,9 +180,7 @@ export const UpdateServiceAvailability = async (
 
 // Get Pending Services
 export const GetPendingServices = async () => {
-  if (!backendurl) throw new Error("Server URL is missing.")
-
-  const res = await fetch(`${backendurl}/services/pending`)
+  const res = await callApi("/api/services/pending")
 
   if (!res.ok) {
     throw new Error("Failed to get pending services")
@@ -205,9 +191,7 @@ export const GetPendingServices = async () => {
 
 // Get All Services (admin — any approval status)
 export const GetAllServices = async () => {
-  const res = await fetch(`${getServerUrl()}/services/all`, {
-    cache: "no-store",
-  })
+  const res = await callApi("/api/services/all")
 
   if (!res.ok) {
     throw new Error("Failed to get all services")
@@ -221,9 +205,7 @@ export const UpdateServiceApproval = async (
   id: string,
   approvalStatus: "approved" | "rejected"
 ) => {
-  if (!backendurl) throw new Error("Server URL is missing.")
-
-  const res = await fetch(`${backendurl}/services/${id}/approval`, {
+  const res = await callApi(`/api/admin/services/${id}/approval`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

@@ -3,6 +3,8 @@
 // PAYMENT TYPES
 // ================================
 
+import { callApi } from "@/lib/call-api"
+
 /** Shape of a payment document stored by the backend's payments collection. */
 export interface IPayment {
   _id: string;
@@ -21,13 +23,9 @@ export interface IPayment {
 }
 
 export const CheckoutVerify = async (session_id: string) => {
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
-
-  if (!serverUrl) {
-    throw new Error("Server URL is missing");
-  }
-
-  const res = await fetch(`${serverUrl}/payments/verify-session`, {
+  // jwt-secured /api layer — the backend re-checks ownership against
+  // the session email (src/app/api/payments/verify-session/route.ts)
+  const res = await callApi("/api/payments/verify-session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,15 +46,15 @@ export const CheckoutVerify = async (session_id: string) => {
 
 // ================================
 // GET CUSTOMER PAYMENTS
+// GET /api/payments/my (email comes from the session)
 // ================================
 
-export const getMyPayments = async (email: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/payments/my-payments?email=${encodeURIComponent(email)}`
-  );
+export const getMyPayments = async () => {
+  const res = await callApi("/api/payments/my")
 
   if (!res.ok) {
-    throw new Error("Failed to fetch payment history");
+    const data = await res.json().catch(() => null)
+    throw new Error(data?.message || "Failed to fetch payment history")
   }
 
   return res.json();
@@ -68,12 +66,11 @@ export const getMyPayments = async (email: string) => {
 // ================================
 
 export const getAllPayments = async () => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/payments/all-payments`
-  );
+  const res = await callApi("/api/admin/payments")
 
   if (!res.ok) {
-    throw new Error("Failed to fetch all payments");
+    const data = await res.json().catch(() => null)
+    throw new Error(data?.message || "Failed to fetch all payments")
   }
 
   return res.json();
@@ -82,15 +79,15 @@ export const getAllPayments = async () => {
 
 // ========================================
 // GET TECHNICIAN EARNINGS
+// GET /api/payments/technician-earnings (email comes from the session)
 // ========================================
 
-export const getTechnicianEarnings = async (email: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/payments/technician-earnings?email=${encodeURIComponent(email)}`
-  );
+export const getTechnicianEarnings = async () => {
+  const res = await callApi("/api/payments/technician-earnings")
 
   if (!res.ok) {
-    throw new Error("Failed to fetch technician earnings");
+    const data = await res.json().catch(() => null)
+    throw new Error(data?.message || "Failed to fetch technician earnings")
   }
 
   return res.json();

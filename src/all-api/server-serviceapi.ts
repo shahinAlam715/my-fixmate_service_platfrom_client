@@ -1,34 +1,13 @@
-"user server"
+"use server"
 
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
+import { callApi } from "@/lib/call-api"
 
-
-
-const backendurl = process.env.NEXT_PUBLIC_SERVER_URL 
-
-
+// GET /api/services/technician — the signed-in technician's own
+// listings (the route derives the email from the session).
 export const Uniqtechniciandata = async () => {
-  if (!backendurl) {
-    throw new Error("Server URL is missing.")
-  }
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
+  const res = await callApi("/api/services/technician", {
+    cache: "no-store",
   })
-
-  const technicianEmail = session?.user?.email
-
-  if (!technicianEmail) {
-    return []
-  }
-
-  const res = await fetch(
-    `${backendurl}/services/technician/${encodeURIComponent(technicianEmail)}`,
-    {
-      cache: "no-store",
-    }
-  )
 
   if (!res.ok) {
     throw new Error("Failed to fetch technician services.")

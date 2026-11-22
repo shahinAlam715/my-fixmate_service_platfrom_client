@@ -82,11 +82,9 @@ const getPaymentMeta = (status: IBooking["paymentStatus"]) =>
 
 export default function MyBookings({
   bookings,
-  customerEmail,
   error,
 }: {
   bookings: IBooking[];
-  customerEmail: string;
   error: string | null;
 }) {
   const router = useRouter();
@@ -119,7 +117,7 @@ export default function MyBookings({
     setIsCancelling(true);
 
     try {
-      await cancelBooking(cancelTarget._id, customerEmail);
+      await cancelBooking(cancelTarget._id);
 
       setRows((prev) =>
         prev.map((booking) =>

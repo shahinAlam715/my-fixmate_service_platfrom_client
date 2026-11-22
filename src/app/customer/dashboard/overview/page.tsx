@@ -111,7 +111,7 @@ export default function OverviewPage() {
 
     let cancelled = false;
 
-    getMyBookings(customerEmail)
+    getMyBookings()
       .then((payload: unknown) => {
         if (cancelled) return;
 

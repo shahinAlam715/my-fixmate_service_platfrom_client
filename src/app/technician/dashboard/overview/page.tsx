@@ -117,7 +117,7 @@ export default function OverviewPage() {
 
     let cancelled = false;
 
-    Promise.all([getTechnicianBookings(technicianEmail), getTechnicianEarnings(technicianEmail)])
+    Promise.all([getTechnicianBookings(), getTechnicianEarnings()])
       .then(([bookingsPayload, earningsPayload]: [unknown, unknown]) => {
         if (cancelled) return;
 
