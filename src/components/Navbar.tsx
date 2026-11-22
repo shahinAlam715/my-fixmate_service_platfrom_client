@@ -40,9 +40,9 @@ const NAV_LINKS = [
 ];
 
 const DASHBOARD_ROUTES: Record<Role, string> = {
-  customer: "/customer/dashboard",
-  technician: "/technician/dashboard",
-  admin: "/admin/dashboard",
+  customer: "/customer/dashboard/overview",
+  technician: "/technician/dashboard/overview",
+  admin: "/admin/dashboard/overview",
 };
 
 const ROLE_BADGES: Record<Role, { label: string; className: string }> = {
