@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FixMate — Repair Service Platform
 
-## Getting Started
+## Project Overview
+FixMate is a repair service platform designed to connect customers with technicians for TV, AC, and electronic device repair services. Customers can explore services, submit repair requests, book technicians, and make payments. Technicians can manage their services and repair requests, while administrators manage the platform.
 
-First, run the development server:
+## Live Website
+- **Live URL:** https://my-fixmate-service-platfrom-client.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Admin Credentials
+- **Admin Email:** `YOUR_ADMIN_EMAIL`
+- **Admin Password:** `YOUR_ADMIN_PASSWORD`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> Replace these placeholders with your actual admin credentials before submitting.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Authentication:** Secure login and registration with Better Auth and Google authentication.
+- **Role-Based Access:** Separate access for customers, technicians, and administrators.
+- **Service Listings:** Browse available TV, AC, and electronic repair services.
+- **Repair Requests:** Customers can submit repair requests with details, address, phone number, and preferred date.
+- **Technician Dashboard:** Technicians can manage repair services and assigned requests.
+- **Service Management:** Add, update, and manage repair service listings.
+- **Admin Dashboard:** Admin can manage platform activities and service approvals.
+- **Online Payment:** Secure payment integration with Stripe.
+- **Responsive Design:** Responsive user interface for desktop, tablet, and mobile devices.
+- **Service Search:** Search and filter services for easier discovery.
+- **Booking Management:** Customers can view and manage their repair bookings.
 
-## Learn More
+## Technology Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- TypeScript
+- Tailwind CSS
+- Node.js
+- Express.js
+- MongoDB
+- Better Auth
+- Stripe
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## NPM Packages Used
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Frontend
+- `next`
+- `react`
+- `react-dom`
+- `typescript`
+- `tailwindcss`
+- `better-auth`
+- `@stripe/react-stripe-js`
+- `@stripe/stripe-js`
+- `lucide-react`
 
-## Deploy on Vercel
+### Backend
+- `express`
+- `mongodb`
+- `cors`
+- `dotenv`
+- `jose`
+- `stripe`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> Package list should be checked against the actual `package.json` files before final submission.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Installation and Setup
+
+1. Clone the repository.
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Configure the environment variables.
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+## Purpose
+
+FixMate aims to simplify the repair service booking process by connecting customers with skilled technicians through a convenient online platform.
+
