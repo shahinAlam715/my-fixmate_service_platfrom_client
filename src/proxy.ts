@@ -1,30 +1,26 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { auth } from "./lib/auth";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { auth } from './lib/auth'
+import { headers } from 'next/headers'
 
+// This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {
-  try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
 
-    // If user is not logged in
-    if (!session?.user) {
-      return NextResponse.redirect(
-        new URL("/sign-in", request.url),
-      );
-    }
+   const session = await auth.api.getSession({
+    headers: await headers() // you need to pass the headers object.
+})
+     const user = session?.user
 
-    // If user is logged in, continue
-    return NextResponse.next();
-  } catch (error) {
-    console.error("Proxy authentication error:", error);
+     if (!user) {
+         return NextResponse.redirect(new URL('/sign-in', request.url))
+     }
 
-    return NextResponse.redirect(
-      new URL("/sign-in", request.url),
-    );
-  }
+     return NextResponse.next()
 }
+
+
+// Alternatively, you can use a default export:
+// export default function proxy(request: NextRequest) { ... }
 
 export const config = {
   matcher: [
@@ -33,4 +29,4 @@ export const config = {
     "/technician/dashboard/:path*",
     "/update-profile",
   ],
-};
+}
